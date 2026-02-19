@@ -181,36 +181,33 @@ with tab1:
         key="v11"
     )
 
-    if v11_files:
+if v11_files and base_df is not None:
 
-        transformed_list = []
+    transformed_list = []
 
-        for file in v11_files:
+    for file in v11_files:
 
-            df = load_excel(file)
+        df = load_excel(file)
 
-            if not v11.validate(df):
-                st.warning(f"{file.name} 구조 불일치")
-                continue
+        if not v11.validate(df):
+            st.warning(f"{file.name} 구조 불일치")
+            continue
 
-            transformed = v11.transform(df)
-            transformed_list.append(transformed)
+        transformed = v11.preprocess(df, base_df)
+        transformed_list.append(transformed)
 
-        if transformed_list:
+    if transformed_list:
 
-            final_v11 = v11.combine(transformed_list)
+        final_v11 = pd.concat(transformed_list, ignore_index=True)
 
-            st.success("✅ 기타매출 집계 완료")
-            st.dataframe(final_v11.head(20))
+        st.success("✅ 기타매출 집계 완료")
+        st.dataframe(final_v11.head(20))
 
-            st.download_button(
-                "⬇ 기타매출 결과 다운로드",
-                data=to_excel_with_format(
-                    final_v11,
-                    highlight_after_col=None
-                ),
-                file_name="매출_기타매출_통합.xlsx"
-            )
+        st.download_button(
+            "⬇ 기타매출 결과 다운로드",
+            data=to_excel_with_format(final_v11),
+            file_name="매출_기타매출_통합.xlsx"
+        )
 
 
     # =========================
